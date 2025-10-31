@@ -35,4 +35,6 @@ class OfficineTest {
         // Assert
         assertEquals(3, o.quantite("oeil de grenouille"));
     }
+
+    
 }

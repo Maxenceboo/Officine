@@ -15,6 +15,12 @@
     <maven.compiler.target>17</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <junit.jupiter.version>5.10.2</junit.jupiter.version>
+    <!-- SonarCloud: point to JaCoCo XML report -->
+    <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+    <!-- SonarCloud identifiers (replace with your real values) -->
+    <sonar.organization>maxenceboo</sonar.organization>
+    <sonar.projectKey>maxenceboo_Officine</sonar.projectKey>
+    <sonar.host.url>https://sonarcloud.io</sonar.host.url>
   </properties>
 
   <dependencies>
@@ -29,6 +35,28 @@
 
   <build>
     <plugins>
+      <!-- Code coverage for SonarCloud -->
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.12</version>
+        <executions>
+          <!-- Attach JaCoCo agent to unit tests -->
+          <execution>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <!-- Generate XML report needed by Sonar -->
+          <execution>
+            <id>report</id>
+            <phase>test</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
@@ -40,4 +68,3 @@
     </plugins>
   </build>
 </project>
-
