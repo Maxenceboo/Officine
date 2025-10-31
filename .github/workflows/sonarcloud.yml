@@ -31,8 +31,19 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           if [ -z "${SONAR_TOKEN}" ]; then
-            echo "::error::Missing secret SONAR_TOKEN. Create it in repo settings with a SonarCloud user token.";
-            exit 1;
+            echo "::warning::Missing secret SONAR_TOKEN. SonarCloud analysis will be skipped.";
+          fi
+
+      - name: Decide whether to run SonarCloud
+        id: sonarcheck
+        run: |
+          ORG=$(grep -oP '(?<=<sonar.organization>).*?(?=</sonar.organization>)' pom.xml | head -n1 || true)
+          KEY=$(grep -oP '(?<=<sonar.projectKey>).*?(?=</sonar.projectKey>)' pom.xml | head -n1 || true)
+          if [ -z "$ORG" ] || [ -z "$KEY" ] || echo "$ORG$KEY" | grep -q 'YOUR_ORG_KEY'; then
+            echo "SonarCloud not configured (org/projectKey). Skipping analysis.";
+            echo "run=false" >> $GITHUB_OUTPUT
+          else
+            echo "run=true" >> $GITHUB_OUTPUT
           fi
 
       - name: Build, test and coverage (debug)
@@ -40,6 +51,7 @@ jobs:
           mvn -B -V -e -X verify
 
       - name: SonarCloud analyze (debug)
+        if: steps.sonarcheck.outputs.run == 'true' && env.SONAR_TOKEN != ''
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |

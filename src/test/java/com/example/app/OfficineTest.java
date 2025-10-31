@@ -83,4 +83,45 @@ class OfficineTest {
         assertEquals(avant, o.quantite("pincée de poudre de lune"));
     }
 
+    @Test
+    @DisplayName("Singulier/Pluriel: 'yeux' ≡ 'oeil' (ajout & lecture)")
+    void pluriel_irregulier_yeux_oeil() {
+        // Arrange
+        o.rentrer("2 yeux de grenouille");
+
+        // Act
+        int qSingulier = o.quantite("oeil de grenouille");
+
+        // Assert
+        assertEquals(2, qSingulier);
+    }
+
+    @Test
+    @DisplayName("Pluriel simple: on aligne sur le premier mot sans 's'")
+    void pluriel_simple_premierMotSansS() {
+        // Arrange
+        o.rentrer("3 larmes de brume funèbre");
+
+        // Act
+        int q = o.quantite("larme de brume funèbre");
+
+        // Assert
+        assertEquals(3, q);
+    }
+
+    @Test
+    @DisplayName("preparer() accepte les libellés pluriels")
+    void preparer_avecLibellePluriel_ok() {
+        // Arrange
+        o.rentrer("2 larmes de brume funèbre");
+        o.rentrer("1 goutte de sang de citrouille");
+
+        // Act
+        int faits = o.preparer("1 fioles de glaires purulentes");
+
+        // Assert
+        assertEquals(1, faits);
+        assertEquals(1, o.quantite("fiole de glaires purulentes"));
+    }
+
 }
