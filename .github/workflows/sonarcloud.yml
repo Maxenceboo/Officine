@@ -10,6 +10,9 @@ on:
 jobs:
   build-and-analyze:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -23,11 +26,24 @@ jobs:
           java-version: '17'
           cache: maven
 
-      - name: Build and analyze (Maven + SonarCloud)
+      - name: Verify SONAR_TOKEN is present
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          mvn -B -e verify \
+          if [ -z "${SONAR_TOKEN}" ]; then
+            echo "::error::Missing secret SONAR_TOKEN. Create it in repo settings with a SonarCloud user token.";
+            exit 1;
+          fi
+
+      - name: Build, test and coverage (debug)
+        run: |
+          mvn -B -V -e -X verify
+
+      - name: SonarCloud analyze (debug)
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          mvn -B -e -X \
+            -DskipTests \
             org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
             -Dsonar.token=${SONAR_TOKEN}
-
