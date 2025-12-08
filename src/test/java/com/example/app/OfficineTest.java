@@ -124,4 +124,55 @@ class OfficineTest {
         assertEquals(1, o.quantite("fiole de glaires purulentes"));
     }
 
+    @Test
+    @DisplayName("CRUD: creer() ajoute un nouvel item et initialise la quantité")
+    void crud_creer_ajouteItem() {
+        boolean created = o.creer("feuille de mandragore", 5);
+
+        assertTrue(created);
+        assertEquals(5, o.quantite("feuille de mandragore"));
+    }
+
+    @Test
+    @DisplayName("CRUD: creer() sur un item existant retourne false et laisse le stock intact")
+    void crud_creer_itemExistant_retourneFalse() {
+        int avant = o.quantite("oeil de grenouille");
+
+        boolean created = o.creer("oeil de grenouille", 10);
+
+        assertFalse(created);
+        assertEquals(avant, o.quantite("oeil de grenouille"));
+    }
+
+    @Test
+    @DisplayName("CRUD: mettreAJour() change la quantité d'un item existant")
+    void crud_mettreAJour_modifieQuantite() {
+        o.rentrer("2 crocs de troll");
+
+        boolean updated = o.mettreAJour("croc de troll", 7);
+
+        assertTrue(updated);
+        assertEquals(7, o.quantite("croc de troll"));
+    }
+
+    @Test
+    @DisplayName("CRUD: mettreAJour() sur un item manquant retourne false")
+    void crud_mettreAJour_itemManquant_retourneFalse() {
+        boolean updated = o.mettreAJour("pierre de lune", 3);
+
+        assertFalse(updated);
+    }
+
+    @Test
+    @DisplayName("CRUD: supprimer() retire l'item et désactive sa recette le cas échéant")
+    void crud_supprimer_retireItemEtRecette() {
+        // Act
+        boolean deleted = o.supprimer("fiole de glaires purulentes");
+
+        // Assert
+        assertTrue(deleted);
+        assertEquals(0, o.preparer("1 fiole de glaires purulentes")); // plus de recette
+        assertFalse(o.mettreAJour("fiole de glaires purulentes", 3)); // plus dans le stock
+    }
+
 }

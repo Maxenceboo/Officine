@@ -69,6 +69,42 @@ public class Officine {
     }
 
     /**
+     * CRUD - Create: ajoute un nouvel item au catalogue (ingrédient ou potion) avec une quantité initiale.
+     * Retourne false si l'item existe déjà.
+     */
+    public boolean creer(String nom, int quantiteInitiale) {
+        if (quantiteInitiale < 0) throw new IllegalArgumentException("quantiteInitiale ne peut pas être négative");
+        String key = canonical(nom);
+        if (stock.containsKey(key)) return false;
+        stock.put(key, quantiteInitiale);
+        return true;
+    }
+
+    /**
+     * CRUD - Update: met à jour la quantité d'un item existant.
+     * Retourne false si l'item n'existe pas.
+     */
+    public boolean mettreAJour(String nom, int nouvelleQuantite) {
+        if (nouvelleQuantite < 0) throw new IllegalArgumentException("nouvelleQuantite ne peut pas être négative");
+        String key = canonical(nom);
+        if (!stock.containsKey(key)) return false;
+        stock.put(key, nouvelleQuantite);
+        return true;
+    }
+
+    /**
+     * CRUD - Delete: supprime un item du stock. Si l'item est une potion,
+     * sa recette n'est plus disponible.
+     * Retourne false si l'item n'existait pas.
+     */
+    public boolean supprimer(String nom) {
+        String key = canonical(nom);
+        boolean existed = stock.remove(key) != null;
+        recettes.remove(key); // supprime la recette si c'était une potion
+        return existed;
+    }
+
+    /**
      * Prépare des potions selon les stocks et la recette.
      * Exemple: preparer("2 fioles de glaires purulentes") -> nombre réellement préparé.
      * Met à jour les stocks: -ingrédients, +potions produites.
