@@ -175,4 +175,31 @@ class OfficineTest {
         assertFalse(o.mettreAJour("fiole de glaires purulentes", 3)); // plus dans le stock
     }
 
+    // ==== Tests supplémentaires pour améliorer la couverture ====
+
+    @Test
+    @DisplayName("creer() et mettreAJour() lèvent IllegalArgumentException pour quantités négatives")
+    void crud_negativeQuantities_throw() {
+        assertThrows(IllegalArgumentException.class, () -> o.creer("mandragore", -1));
+        assertThrows(IllegalArgumentException.class, () -> o.mettreAJour("oeil de grenouille", -5));
+    }
+
+    @Test
+    @DisplayName("canonical() gère un seul mot (ex: 'yeux' -> 'oeil' et 'pomme' -> 'pomme')")
+    void canonical_singleWord_behaviour() throws Exception {
+        // Utilise les méthodes publiques pour valider le comportement sur mots simples
+        o.rentrer("2 yeux");
+        assertEquals(2, o.quantite("oeil"));
+
+        o.rentrer("3 pommes");
+        assertEquals(3, o.quantite("pomme"));
+    }
+
+    @Test
+    @DisplayName("parseQty/parseName: étiquetage sans quantité fonctionne (défaut=1)")
+    void parse_withoutQuantity_defaultsToOne() {
+        o.rentrer("larme de brume funèbre"); // équivaut à 1
+        assertEquals(1, o.quantite("larme de brume funèbre"));
+    }
+
 }

@@ -4,6 +4,17 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Petite "officine" pour gérer un stock d'ingrédients et la préparation de potions.
+ *
+ * - Stocke des ingrédients et des potions (clé canonicalisée).
+ * - Supporte CRUD minimal (creer, mettreAJour, supprimer).
+ * - Prépare des potions à partir de recettes définies dans le constructeur.
+ *
+ * Remarques de conception :
+ * - Les clés sont canonicalisées (gestion simple du pluriel sur le premier mot).
+ * - Méthodes publiques : thread-unsafe (usage simple mono-thread dans les tests).
+ */
 public class Officine {
 
     private final Map<String, Integer> stock = new HashMap<>();
@@ -56,7 +67,11 @@ public class Officine {
         }));
     }
 
-    /** Ajoute au stock. Exemple: rentrer("3 yeux de grenouille"). */
+    /**
+     * Ajoute au stock. Exemple: rentrer("3 yeux de grenouille").
+     * Accepte une quantité en préfixe ; défaut = 1.
+     * @param entree libellé (avec quantité optionnelle)
+     */
     public void rentrer(String entree) {
         int qty = parseQty(entree);
         String name = canonical(parseName(entree));
@@ -71,6 +86,7 @@ public class Officine {
     /**
      * CRUD - Create: ajoute un nouvel item au catalogue (ingrédient ou potion) avec une quantité initiale.
      * Retourne false si l'item existe déjà.
+     * @throws IllegalArgumentException si quantiteInitiale < 0
      */
     public boolean creer(String nom, int quantiteInitiale) {
         if (quantiteInitiale < 0) throw new IllegalArgumentException("quantiteInitiale ne peut pas être négative");
@@ -83,6 +99,7 @@ public class Officine {
     /**
      * CRUD - Update: met à jour la quantité d'un item existant.
      * Retourne false si l'item n'existe pas.
+     * @throws IllegalArgumentException si nouvelleQuantite < 0
      */
     public boolean mettreAJour(String nom, int nouvelleQuantite) {
         if (nouvelleQuantite < 0) throw new IllegalArgumentException("nouvelleQuantite ne peut pas être négative");
@@ -108,6 +125,8 @@ public class Officine {
      * Prépare des potions selon les stocks et la recette.
      * Exemple: preparer("2 fioles de glaires purulentes") -> nombre réellement préparé.
      * Met à jour les stocks: -ingrédients, +potions produites.
+     * @param demande libellé avec quantité optionnelle
+     * @return nombre de potions effectivement préparées
      */
     public int preparer(String demande) {
         int voulu = parseQty(demande);
